@@ -32,3 +32,21 @@ In the second code cell a function `undistort(img)` was also defined. This funct
 
 
 ![Undistorted image example](readme_img/undist_img.jpg)
+
+### Bird's Eye View transformation
+
+Parallel lines appear to converge on images from the front facing camera due to perspective. In order to keep parallel lines parallel a bird's eye view transformation was applied. We shrink the bottom edge of an image to produce the same scale of the road to the top edge of the image. The way of transformation was selected because it preserves all avalable pixels from the raw image on the top edge where we have lower relative resolution. To find correct transformation source and destinations  points a test image with flat and straight road was used.
+
+The following code computes the bird's eye view transformation matrix (`M`) as well as the matrix for inverse transformation (`Minv`). 
+
+```Python
+
+def create_M():
+    src = np.float32([[0, 673], [1207, 673], [0, 450], [1280, 450]])
+    dst = np.float32([[569, 223], [711, 223], [0, 0], [1280, 0]])
+    M = cv2.getPerspectiveTransform(src, dst)
+    Minv = cv2.getPerspectiveTransform(dst, src)
+    return M, Minv
+
+```
+
