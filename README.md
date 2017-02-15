@@ -35,7 +35,7 @@ In the second code cell a function `undistort(img)` was also defined. This funct
 
 ### Bird's Eye View transformation
 
-Parallel lines appear to converge on images from the front facing camera due to perspective. In order to keep parallel lines parallel a bird's eye view transformation was applied. We shrink the bottom edge of an image to produce the same scale of the road to the top edge of the image. The way of transformation was selected because it preserves all avalable pixels from the raw image on the top edge where we have lower relative resolution. To find correct transformation source and destinations  points a test image with flat and straight road was used.
+Parallel lines appear to converge on images from the front facing camera due to perspective. In order to keep parallel lines parallel a bird's eye view transformation was applied. We shrink the bottom edge of an image to produce the same scale of the road to the top edge of the image. The way of transformation was selected because it preserves all avalable pixels from the raw image on the top edge where we have lower relative resolution. To find correct transformation source and destinations  points a test image with flat and straight road was used. We also crop images to skip areas with hood and sky.
 
 The following code computes the bird's eye view transformation matrix (`M`) as well as the matrix for inverse transformation (`Minv`). 
 
@@ -47,6 +47,10 @@ def create_M():
     M = cv2.getPerspectiveTransform(src, dst)
     Minv = cv2.getPerspectiveTransform(dst, src)
     return M, Minv
-
 ```
+Two sample images after undistortion and warping are presented below.
 
+![Warped image 1](readme_img/warped_img1.jpg)
+![Warped image 2](readme_img/warped_img2.jpg)
+
+As we can see, parallel lines look roughly parallel. One should note that there could be significant brightness variation of the road on an image due to shadows.
