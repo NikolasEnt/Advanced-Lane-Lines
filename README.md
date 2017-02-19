@@ -127,7 +127,7 @@ xm_in_px = 3.675 / 85 # Lane width (12 ft in m) is ~85 px on image
 ym_in_px = 3.048 / 24 # Dashed line length (10 ft in m) is ~24 px on image
 ```
 
-The radius of curvature is given in meters assuming the curve of the road follows a circle. Radius of lanes curvature was calculated out of polinomial lane lines approximation by the `r_curv` function by a formula from a [website](http://www.intmath.com/applications-differentiation/8-radius-curvature.php), which was recomended in the course notes, in the closest to the vehicle point. If the calculated radius is bigger than `MAX_RADIUS = 10000` then the `MAX_RADIUS` value is returned (and inprinted onto video frame as *Inf*) because such a big radiuses of curvature are very unaccurate and can be considered as a straight line. The computed radiuses for left and right lines were averaged before inprinting onto video frame. Offset from the lane center was estimated as lane ofset in pixels, converted to meters by the `lane_offset` function. It was assumed that the camera is mounted at the center of the car and the deviation of the midpoint of the lane from the center of the image is the desired offset.
+The radius of curvature is given in meters assuming the curve of the road follows a circle. Radius of lanes curvature was calculated out of polinomial lane lines approximation by the `r_curv` function by a formula from a [website](http://www.intmath.com/applications-differentiation/8-radius-curvature.php), which was recomended in the course notes, in the closest to the vehicle point. If the calculated radius is bigger than `MAX_RADIUS = 10000` then the `MAX_RADIUS` value is returned (and inprinted onto video frame as *Inf*) because such a big radiuses of curvature are very unaccurate and can be considered as a straight line. The computed radiuses for left and right lines were averaged before inprinting onto video frame. Offset from the lane center was estimated as lane offset in pixels, converted to meters by the `lane_offset` function. It was assumed that the camera is mounted at the center of the car and the deviation of the midpoint of the lane from the center of the image is the desired offset.
 
 ### Equidistant
 
@@ -175,7 +175,7 @@ Despite of usage of adaptive sensors, which allow to perform quite well in diffe
 
 Glare on the road, appearing, for example, under trees, may lead to noisy results. Additional issues could happen due to poor condition of road marking, intersection of different lines. It could partly be resolved by additional line filtering between video frames.
 
-However, the main problem is the absence of road marking lines or their invisibility. Lines on the road could by invisible due to dust or, as it is more common happen, snow coverage or autumn leaves on the road. More sophisticated algorithms (such as deep neural networks) should be applied in the case of line absence in order to predict and determinate where the lane position should be.
+However, the main problem is the absence of road marking lines or their invisibility. Lines on the road could by invisible due to dust or, as it is more common happen, snow coverage or autumn leaves on the road. Partly snow coverage could confuse the algorithm as well because wind may form intricate snow patterns on the road. More sophisticated algorithms (such as deep neural networks) should be applied in the case of line absence in order to predict and determinate where the lane position should be.
 
 ## Further ideas
 
