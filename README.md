@@ -50,6 +50,10 @@ Unfortunately, the optimal combination of these filters which is able to separat
 
 ![Grayscale red+0.5sat image](readme_img/s_hls_red.png)
 
+Despite we are not going to directly use binary images, here is an example, how a binary image, prodused out of the above image, could look like.
+
+![Binary image](readme_img/bin_img.jpg)
+
 Several useful functions were introduced in this section. It is a common practice to use a histogram normalization before image processing which usually helps to perform better.
 
 ```Python
@@ -147,7 +151,18 @@ The described above ideas on points finding were implemented in the `find` funct
 
 The inverse transformation and drawing lane line on an image performed in the same way to suggested in the lectures. The function `draw_line` can just visualize found lane line on an image, or, in case of video, it also inprints radius of the road curvature and the vehicle offset from the lane center.
 
-There are some examples of the points finding and inverse transformation of the lane on a real images from the provided test images set and on a snapshot from the `harder_challenge_video.mp4`. More examples could be found in the [LaneLine.ipynb](https://github.com/NikolasEnt/Advanced-Lane-Lines/blob/master/LaneLine.ipynb).
+### Pipeline visualization
+After image warping the algorithm perform points finding by the described in *Ideas* section points finding approach. Basically, virtual sensors are  filters with an adaptive region-of-interest and adaptive threshold.
+
+Each virtual sensor considers points which have values higher than mean pixel value in the sensor plus the threshold (local binary image for the virtual sensor). The threshold value is calculated for each sensor individually based on the mean value of pixels in the sensor. The line point is the pixel with the maximum value among all considered pixels. The sensor position (ROI) determinated by the position of the previously detected line point (for still images) or by the polynomial fit of line points from the previous frame (for videos).
+
+![readme_img/pipeline1.jpg](readme_img/pipeline1.jpg)
+![readme_img/pipeline2.jpg](readme_img/pipeline2.jpg)
+![readme_img/pipeline3.jpg](readme_img/pipeline3.jpg)
+![readme_img/pipeline4.jpg](readme_img/pipeline4.jpg)
+![readme_img/pipeline5.jpg](readme_img/pipeline5.jpg)
+
+There are some extra examples of the points finding and inverse transformation of the lane on a real images from the provided test images set and on a snapshot from the `harder_challenge_video.mp4`. More examples could be found in the [LaneLine.ipynb](https://github.com/NikolasEnt/Advanced-Lane-Lines/blob/master/LaneLine.ipynb).
 
 ![readme_img/img1.jpg](readme_img/img1.jpg)  ![readme_img/img1_proc.jpg](readme_img/img1_proc.jpg)
 
@@ -169,7 +184,9 @@ Resulting videos are in the [video_proc](https://github.com/NikolasEnt/Advanced-
 
 The algorithm demonstrated ability to correctly identify lane lines on the [project_video.mp4](https://github.com/NikolasEnt/Advanced-Lane-Lines/blob/master/video_proc/project_video_proc.mp4), [challenge_video.mp4](https://github.com/NikolasEnt/Advanced-Lane-Lines/blob/master/video_proc/harder_challenge_video_proc.mp4) and to some extent on the [harder_challenge_video.mp4](https://github.com/NikolasEnt/Advanced-Lane-Lines/blob/master/video_proc/harder_challenge_video_proc.mp4).
 
-Probably, radius of road curvature is underestimated (about 400 m for the *project_video.mp4*) because of not accurate enough scale determination.
+Probably, radius of road curvature is underestimated (about 400 m for the *project_video.mp4*) because of not accurate enough scale determination. Nevertheless, it is a correct value in order of magnitude. 
+
+It should be noted that the algorithm assumes lane lines parallelity on the warped images (for example, when it uses equidistant to draw an absent line), which is not true in case of hilly terrain and in such situations the algorithm may fail. 
 
 Despite of usage of adaptive sensors, which allow to perform quite well in different conditions, the algorithm may fail in difficult light conditions, in case of flares or glares. It should be mentioned that most of glares from the dashboard on the windshield may be eliminated by shielding of camera by a simple visor.
 
