@@ -28,7 +28,7 @@ Code of this step is in the first code cell of the Jupyter notebook. Example res
 
 Unfortunatly, the `findChessboardCorners()` failed to find desired corners on three images out of 20 provided calibration images, because there were not enought corners on these images due to framing. These frames were not used for distortion measuring.
 
-![Calibration images where cv2 failed to find desired corners](readme_img/no_corners.jpg)
+![Calibration images in which cv2 failed to find desired corners](readme_img/no_corners.jpg)
 
 ### Computation of camera matrix and distortion coefficients
 
@@ -44,9 +44,9 @@ In the second code cell a function `undistort(img)` was also defined. This funct
 
 ### Binary images
 
-The code for these operations is presented under *Create of thresholded binary image* header. Different Sobel transformation (including magnitude and direction) were implemented as well as red and saturation channels binary thresholds.
+The code for these operations is presented under *Create of thresholded binary image* header. Different transformation, such as Sobel transformation (including magnitude and direction) were implemented as well as red and saturation channels binary thresholds.
 
-Unfortunately, the optimal combination of these filters which is able to separate pixels of lane line from background on snapshots from all three videos was not found. Shadows and glares are quite challenging. (For first two videos such filter combination was successfully found). That is why an idea of using adaptive thresholds, which is described and discussed in detail below, arose. A red channel image was used for white line finding and on a linear combination of the red and saturation channels (computes as *`img[:,:,2]+0.5*s_hls(img)`* where *s_hls* - returns saturation channel of a given color image) - for the yellow line (red channel only also works for yellow line, but such combination seems to perform better). An example is given below.
+Unfortunately, the optimal combination of these filters which is able to separate pixels of lane line from background on snapshots from all three videos was not found. Shadows and glares are quite challenging. (For first two videos such filter combination was successfully found). That is why an idea of using adaptive thresholds, which is described and discussed in detail below, arose. A red channel image was used for white line finding and on a linear combination of the red and saturation channels (computes as *`img[:,:,2]+0.5*s_hls(img)`* where *s_hls* - returns saturation channel of a given color image) - for the yellow line (red channel only also works for yellow line, but such combination seems to perform better). An example of image, used for yellow line detection, is given below.
 
 ![Grayscale red+0.5sat image](readme_img/s_hls_red.png)
 
@@ -63,9 +63,9 @@ def eq_Hist(img): # Histogram normalization
     img[:, :, 2] = cv2.equalizeHist(img[:, :, 2])
     return img
 ```
-### Bird's Eye View transformation
-
 Other useful functions are in a code chunk under *Transform image* header.
+
+### Bird's Eye View transformation
 
 Parallel lines appear to converge on images from the front facing camera due to perspective. In order to keep parallel lines parallel a bird's eye view transformation was applied. We shrink the bottom edge of an image to produce the same scale of the road to the top edge of the image. The way of transformation was selected because it preserves all avalable pixels from the raw image on the top edge where we have lower relative resolution. To find correct transformation source and destinations  points a test image with flat and straight road was used. We also crop images to skip areas with hood and sky.
 
@@ -80,7 +80,7 @@ def create_M():
     Minv = cv2.getPerspectiveTransform(dst, src)
     return M, Minv
 ```
-There is the Main image transformation routine `transform` to get a warped image from a raw image. It uses the `M` matrix for perspective transformation with `cv2.warpPerspective(img, M, img_size)`.  Of course, undistortion is applyed before the Bird's Eye View transformation. Warped image is sharpen by the following code and contrast increased as well.
+There is the main image transformation routine `transform` to get a warped image from a raw image. It uses the `M` matrix for perspective transformation with `cv2.warpPerspective(img, M, img_size)`.  Of course, undistortion is applyed before the Bird's Eye View transformation. Warped image is sharpen by the following code and contrast increased as well. 
 
 ```Python
 def sharpen_img(img):
@@ -106,9 +106,9 @@ As we can see, parallel lines look roughly parallel. Only such warped images are
 ## Ideas
 Several ideas arose after some experiments with suggested in the course binary filters.
 
-- Image should be analyzed with adaptive virtual sensors. Each sensor is a string of pixels (for example, 30 pixels long) in the area where it is expected to find a line.  Virtual sensor can find the line position. The point with the maximum value (brightness) in the virtual sensor is a suspected line point. Line point considered found if its value minus the mean pixels value of the sensor is larger than the threshold and the point is shifted from the sensers center on less than `DEV` pixels.
+- Image should be analyzed with adaptive virtual sensors. Each sensor is a string of pixels (for example, 30 pixels long) in the area where it is expected to find a line.  Virtual sensor can find the line position or can find nothing. The point with the maximum value (brightness) in the virtual sensor is a suspected line point. Line point considered found if its value minus the mean pixels value of the sensor is larger than the threshold and the point is shifted from the sensers center on less than `DEV` pixels.
 
-- Image is analyzed from the bottom to the top because it is the most probable to find a line on the closest to the car road pixels. Position of the next sensor is predicted by position of the previous line point (in case of a still image) position or calculated from polinomial fit of points on the previous frame (in case of a video). 
+- Image is analyzed from the bottom to the top because it is the most probable to find a line on the closest to the car road pixels because resolution is higher near to the hood. Position of the next sensor is predicted by position of the previous line point (in case of a still image) position or calculated from the polinomial fit of points which were found on the previous frame (in case of a video). 
 
 - Threshold value should be selected independently for each virtual sensor based on mean value of pixels in the sensor. In general, the threshold should be as large as possible to reduce false positive results. But in the bright areas it should be less because the region marred by the sunlight and  line contrast decreased. It should also be less for the dark areas, as the line is poorly distinguishable in the dark. It allows to find line points on an image with both deep shadows and bright areas which is very challenging in case of using a constant threshold for the whole image. 
 
@@ -135,13 +135,13 @@ The radius of curvature is given in meters assuming the curve of the road follow
 
 ### Equidistant
 
-An equidistant is needed in case only one line is well determined (the other one is the equidistant because lane lines are parallel). It is known that an equidistant for a polynomial function is a higher order polynomial function. However, it is needed not higher then 3rd order polynomial in order to make line fitting robust and stable. That is why an approximation was used: we create a list of equidistant points for the given polinomial (points laying on a straight lines, perpendicular to the given polynomial at selected points on a desired distance) and fit them with a same order polinomial function. The `np.polyfit` function is used for fitting. See the code chunk under *Equidistant for a polynomial* header. An example plot is given below.
+An equidistant is needed in case only one line is well determined (the other one is the equidistant because lane lines are parallel). It is known that an equidistant for a polynomial function is a higher order polynomial function. However, it is needed to have not higher then 3rd order polynomial in order to make line fitting robust and stable. That is why an approximation was used: we create a list of equidistant points for the given polinomial (points laying on a straight lines, perpendicular to the given polynomial at selected points on a desired distance) and fit them with a same order polinomial function. The `np.polyfit` function is used for fitting. See the code chunk under *Equidistant for a polynomial* header. An example plot is given below.
 
 ![Plot of an Equidistant](readme_img/equid.jpg)
 
 ### Order of a polynomial
 
-One of the key ideas of the project is the usage of the reasonable minimal order of polinomial functions for lines fitting. The function `best_pol_ord` chooses such order (See *Choose the best polynomial order* code chunk). It starts from a linear function and, if it does not perform well enough increases the polinomial order (up to 3). It returns polinomial coefficients and mean squared error of the selected approximation. The function stops increasing the order if it does not help (mean squared error drops not significant in case of higher order) or in case the mean squared error is small enough (`< DEV_POL`).
+One of the key ideas of the project is the usage of the reasonable minimal order of polinomial functions for lines fitting. The function `best_pol_ord` chooses such order (See *Choose the best polynomial order* code chunk). It starts from a linear function and, if it does not perform well enough, increases the polinomial order (up to 3). It returns polinomial coefficients and mean squared error of the selected approximation. The function stops increasing the order if it does not help (mean squared error drops not significant in case of higher order) or in case the mean squared error is small enough (`< DEV_POL`).
 
 It is possible to use a simple low pass filter or an alpha-beta filter for smoothing polynomial coefficients of the same degree. But for two polynomial with different orders a dedicated function `smooth_dif_ord` was introduced. It calculates average x position of points for a given function f(y) at y values from the new dataset and fit these new average points with polinomial of desired degree.
 
@@ -154,7 +154,7 @@ The inverse transformation and drawing lane line on an image performed in the sa
 ### Pipeline visualization
 After image warping the algorithm perform points finding by the described in *Ideas* section points finding approach. Basically, virtual sensors are  filters with an adaptive region-of-interest and adaptive threshold.
 
-Each virtual sensor considers points which have values higher than mean pixel value in the sensor plus the threshold (local binary image for the virtual sensor). The threshold value is calculated for each sensor individually based on the mean value of pixels in the sensor. The line point is the pixel with the maximum value among all considered pixels. The sensor position (ROI) determinated by the position of the previously detected line point (for still images) or by the polynomial fit of line points from the previous frame (for videos).
+Each virtual sensor considers points which have values higher than mean pixel value in the sensor plus the threshold value (it is a kind of local binary image for the virtual sensor). The threshold value is calculated for each sensor individually based on the mean value of pixels in the sensor. The line point is the pixel with the maximum value among all considered pixels. The sensor position (ROI) determinated by the position of the previously detected line point (for still images) or by the polynomial fit of line points from the previous frame (for videos).
 
 ![readme_img/pipeline1.jpg](readme_img/pipeline1.jpg)
 ![readme_img/pipeline2.jpg](readme_img/pipeline2.jpg)
@@ -172,11 +172,11 @@ There are some extra examples of the points finding and inverse transformation o
 
 In case of video the same approach as for still images is used. However, line detection process involves several additional filterings. The `get_lane_video` function performs these actions. See it under *Find lane on video* header in the [LaneLine.ipynb](https://github.com/NikolasEnt/Advanced-Lane-Lines/blob/master/LaneLine.ipynb)
 
-The previous polynomial is used to specify region of search for the find algorithm. Line considered as detected only if there are more than `MIN_POINTS` points found. If it fails to find the line for more than `MAX_N` video frames it starts search from scratch (initially, on the first video frame or in case of line lost it deals with the frame as with a still image). It also skips strange results with very narrow or wide lanes. If it has no ideas about lane position for more than `MAX_N` frames, it stop drawint anything on the video.
+The previous polynomial is used to specify region of search for the `find` algorithm. Line considered as detected only if there are more than `MIN_POINTS` points found. If it fails to find the line for more than `MAX_N` video frames, it starts search from scratch (it deals with the frame as with a still image on the first video frame or in case of line lost). It also skips strange results with very narrow or wide lanes. If it has no ideas about lane position for more than `MAX_N` frames, it stop drawing anything on the video.
 
 In case a line is successfully detected, its coefficients are filtered with weights proportional to the number of found points in the line (it seems to be quite reliable measure of the algorithm confidence about the found line) to smooth jitter. Global variables `right_fit_p, left_fit_p` are used to transfer previous polynomial coefficient between video frames to use them in line smoothing.
 
-If only one line (only left or only right) is detected, then it uses the equidistant function to draw the necessary line.
+If only one line (only left or only right) is detected, then the algorithm uses the equidistant function to draw the necessary line.
 
 ## Results and discussion
 
@@ -192,7 +192,7 @@ Despite of usage of adaptive sensors, which allow to perform quite well in diffe
 
 Glare on the road, appearing, for example, under trees, may lead to noisy results. Additional issues could happen due to poor condition of road marking, intersection of different lines. It could partly be resolved by additional line filtering between video frames.
 
-However, the main problem is the absence of road marking lines or their invisibility. Lines on the road could by invisible due to dust or, as it is more common happen, snow coverage or autumn leaves on the road. Partly snow coverage could confuse the algorithm as well because wind may form intricate snow patterns on the road. More sophisticated algorithms (such as deep neural networks) should be applied in the case of line absence in order to predict and determinate where the lane position should be.
+However, the main problem is the absence of road marking lines or their invisibility. Lines on the road could by invisible due to dust or, as it happens more often, snow coverage or autumn leaves on the road. Partly snow coverage could confuse the algorithm as well because wind may form intricate snow patterns on the road. More sophisticated algorithms (such as deep neural networks) should be applied in the case of line absence in order to predict and determinate where the lane position should be.
 
 ## Further ideas
 
